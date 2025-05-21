@@ -14,7 +14,7 @@ public class Player {
     }
 
     public Move makeMove(){
-        return  new Move();
+        return null;
     }
 
 

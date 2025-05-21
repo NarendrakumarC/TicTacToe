@@ -13,7 +13,7 @@ public class Board {
         for(int row =0;row<dimension;row++){
             this.board.add(new ArrayList<>());
             for(int col =0;col<dimension;col++){
-                this.board.get(row).add(new Cell());
+                this.board.get(row).add(new Cell(row, col));
             }
         }
     }
