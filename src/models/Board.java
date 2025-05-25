@@ -1,5 +1,7 @@
 package models;
 
+import enums.CellState;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +12,13 @@ public class Board {
     public Board(int dimension) {
         this.dimension = dimension;
         this.board = new ArrayList<>();
-        for(int row =0;row<dimension;row++){
+        for (int i =0;i<dimension;i++){
             this.board.add(new ArrayList<>());
-            for(int col =0;col<dimension;col++){
-                this.board.get(row).add(new Cell(row, col));
+            for (int j=0;j<dimension;j++){
+                this.board.get(i).add(new Cell(i,j));
             }
         }
+
     }
 
     public int getDimension() {
@@ -32,5 +35,18 @@ public class Board {
 
     public void setBoard(List<List<Cell>> board) {
         this.board = board;
+    }
+
+    public void print() {
+        for(List<Cell> cells : board){
+            for (Cell cell:cells){
+                if(cell.getCellState().equals(CellState.EMPTY)){
+                    System.out.print("|  |");
+                }else {
+                    System.out.print("| "+cell.getPlayer().getSymbol().getSymbolChar()+" |");
+                }
+            }
+            System.out.println();
+        }
     }
 }

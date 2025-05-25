@@ -10,7 +10,7 @@ public class Bot extends Player{
 
     private BotPlayingStrategy botPlayingStrategy;
 
-    public Bot(String name, Symbol symbol, PlayerType playerType, BotDifficultyLevel botDifficultyLevel) {
+    public Bot(String name, Symbol symbol, BotDifficultyLevel botDifficultyLevel) {
         super(name, symbol, PlayerType.BOT);
         this.botDifficultyLevel = botDifficultyLevel;
         this.botPlayingStrategy = BotPlayingStrategyFactory.getBotPlayingStrategy(botDifficultyLevel);
@@ -19,6 +19,11 @@ public class Bot extends Player{
     public Move makeMove(){
         this.botPlayingStrategy.makeMove();
         return  null;
+    }
+
+    public Cell chooseCellToPlay(Board board){
+        // automated
+        return botPlayingStrategy.chooseCellToPlay(board);
     }
 
 

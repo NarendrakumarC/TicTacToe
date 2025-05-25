@@ -19,10 +19,13 @@ public class GameController {
         return game;
     }
 
-    public void makeMove(){
-
+    public void makeMove(Game game){
+        game.makeMove();
     }
-    public void undo(){
-
+    public void undo(Game game){
+        game.undo(game);
+    }
+    public  void printBoard(Game game){
+        game.printBoard();
     }
 }

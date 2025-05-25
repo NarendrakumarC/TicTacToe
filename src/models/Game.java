@@ -1,5 +1,6 @@
 package models;
 
+import enums.CellState;
 import enums.GameState;
 import enums.PlayerType;
 import exceptions.BotCountInvalidException;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class Game {
     private Board board;
     private List<Player> players;
-    private List<Move> moves;
+    private List<Move> moves; // helps in undo features
     private Player winner;
     private int nextPlayerIndex;
     private GameState gameState;
@@ -32,12 +33,90 @@ public class Game {
         this.winningStrategies = winningStrategies;
     }
 
-    public Player checkWinner(){
+    public void undo(Game game){
+        if(moves.size()==0){
+            System.out.println("There are no moves on the board, hence undo not possible ");
+            return;
+        }
+
+        // Remove the last move from the list
+        // Remove the move from the board, make the cell empty
+     Move lastMove = moves.get(moves.size()-1);
+        moves.remove(lastMove);
+        Cell cell = lastMove.getCell();
+        cell.setCellState(CellState.EMPTY);
+        cell.setPlayer(null);
+
+        // applicable only to human player
+      if(lastMove.getPlayer().getPlayerType().equals(PlayerType.BOT)){
+          System.out.println("Cannot Undo for Bot player");
+          return;
+        }
+
+//(a-b)% m = (a%m-b%m +m) %m
+        nextPlayerIndex = (nextPlayerIndex-1 + players.size()) % players.size();
+
+        //[0,1,2]
+        //update the hashmaps
+
+        for(WinningStrategy winningStrategy: winningStrategies){
+            winningStrategy.handleUndo(lastMove, board.getDimension());
+        }
+    }
+
+    public void makeMove(){
+        // who is next player to play
+        // ask that player to play the game
+        Player currentplayer = players.get(nextPlayerIndex);
+        System.out.println("It's "+currentplayer.getName()+"'s turn");
+        Cell dummyCell =currentplayer.chooseCellToPlay(board);
+        //Before player make move validate the move
+        if(!validateMove(dummyCell.getRow(),dummyCell.getCol())){
+            System.out.println("It's Invalid Move, Can you choose again ?");
+            return;
+        }
+        //Execute the move on the board
+        Cell cell = board.getBoard().get(dummyCell.getRow()).get(dummyCell.getCol());
+        cell.setCellState(CellState.FILLED);
+        cell.setPlayer(currentplayer);
+        Move move = new Move(currentplayer,cell);
+        moves.add(move);
+        // update Next player turn index
+        nextPlayerIndex = (nextPlayerIndex+1) % players.size();
+        //check weather this move is winning move ?
+        if(checkWinner(move)){
+            gameState =GameState.GAMEOVER;
+            winner = currentplayer;
+        } else if (moves.size()==board.getDimension()*board.getDimension()) { //Draw, all the cells are filled
+            gameState =GameState.DRAW;
+        }
+
+    }
+
+    private boolean validateMove(int row, int col){
+        // Boundary checks
+        if(row <0 || col <0 || row >=board.getDimension() || col >=board.getDimension()){
+            return false;
+        }
+        // Do you need to extract cell object from the board corresponding to this row or col
+        if(board.getBoard().get(row).get(col).getCellState().equals(CellState.FILLED)){
+            return  false;
+        }
+        return  true;
+    }
+
+    public void printBoard(){
+        board.print();
+    }
+
+    private boolean checkWinner(Move move){
         //algo to check winner along the rows, cols, diagonal
         for (WinningStrategy winningStrategy : winningStrategies){
-            winningStrategy.checkWinner();
+            if(winningStrategy.checkWinner(move, getBoard().getDimension())){
+                return true;
+            }
         }
-        return null;
+        return false;
     }
     public static Builder getBuilder(){
         return new Builder();
